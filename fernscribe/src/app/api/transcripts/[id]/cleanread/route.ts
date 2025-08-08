@@ -15,7 +15,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
   const cr = await prisma.cleanRead.upsert({
     where: { transcriptId: t.id },
     update: { text: cleaned },
-    create: { transcript: { connect: { id: t.id } }, transcriptId: t.id, text: cleaned },
+    create: { transcript: { connect: { id: t.id } }, text: cleaned },
   })
   return NextResponse.json({ cleanReadId: cr.id, text: cleaned })
 }
