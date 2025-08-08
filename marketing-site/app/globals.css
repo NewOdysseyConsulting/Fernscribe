@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 0 0% 0%;
+  --fg: 0 0% 96%;
+  --muted: 0 0% 70%;
+  --ring: 202 100% 50%;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: hsl(var(--bg));
+  color: hsl(var(--fg));
+}
+
+/* Minimal scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+@layer base {
+  h1 { @apply text-5xl md:text-7xl font-semibold tracking-tight; }
+  h2 { @apply text-3xl md:text-4xl font-semibold tracking-tight; }
+  h3 { @apply text-xl md:text-2xl font-medium; }
+  p { @apply text-base text-zinc-300 leading-relaxed; }
+  a { @apply text-zinc-200 hover:text-white; }
+}
+
+@layer components {
+  .btn-primary { @apply inline-flex items-center justify-center rounded-full bg-white text-black px-6 py-3 text-sm font-medium transition-colors hover:bg-zinc-200; }
+  .btn-ghost { @apply inline-flex items-center justify-center rounded-full border border-zinc-800/80 bg-zinc-900/30 px-5 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800/60; }
+  .surface { @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur; }
+}
+
+.hero-gradient {
+  background-image: var(--hero-gradient);
+}
