@@ -28,11 +28,12 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
   if (format === 'docx') {
     const buf = await generateDOCX(transcriptId)
-    return new NextResponse(buf, { headers: { 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' } })
+    const body = new Uint8Array(buf)
+    return new NextResponse(body, { headers: { 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' } })
   }
   if (format === 'txt') {
     const t = await getTranscriptData(transcriptId)
-    const base = clean && t.cleanReadId ? t.cleanRead?.text ?? '' : t.segments.map((s) => s.text).join(' ')
+    const base = clean && t.cleanRead ? (t.cleanRead?.text ?? '') : t.segments.map((s) => s.text).join(' ')
     const txt = await generateTXT(transcriptId, base)
     return new NextResponse(txt, { headers: { 'Content-Type': 'text/plain' } })
   }

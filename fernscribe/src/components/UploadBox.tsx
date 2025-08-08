@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { upload } from '@vercel/blob/client'
 
 export default function UploadBox() {
   const [file, setFile] = useState<File | null>(null)
@@ -21,25 +22,13 @@ export default function UploadBox() {
     setIsUploading(true)
     setMessage(null)
     try {
-      const signed = await fetch('/api/upload/signed-url', {
-        method: 'POST',
-        body: JSON.stringify({ filename: file.name, contentType: file.type }),
-      }).then((r) => r.json())
-
-      const putRes = await fetch(signed.url, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
+      const result = await upload(file.name, file, {
+        access: 'public',
+        contentType: file.type,
+        handleUploadUrl: '/api/upload/handle',
       })
-      if (!putRes.ok && putRes.status !== 201) throw new Error('Upload failed')
 
-      let blobUrl: string | undefined
-      try {
-        const json = await putRes.clone().json()
-        blobUrl = json?.blobUrl || json?.url
-      } catch {
-        blobUrl = putRes.headers.get('location') || undefined
-      }
+      const blobUrl = result.url
       if (!blobUrl) throw new Error('Blob URL missing')
 
       const job = await fetch('/api/jobs/transcribe', {

@@ -81,8 +81,8 @@ export async function pollAndIngestTranscript(jobId: string) {
   const transcript = existing ?? (await prisma.transcript.create({ data: { fileId: job.fileId } }))
 
   const speakersMap = new Map<string, string>()
-  const speakers = (transcriptData.utterances || []).map((u: any) => u.speaker || 'Speaker')
-  Array.from(new Set(speakers)).forEach((label, idx) => speakersMap.set(label, `S${idx + 1}`))
+  const speakers = (transcriptData.utterances || []).map((u: any) => u.speaker || 'Speaker') as string[]
+  Array.from(new Set<string>(speakers)).forEach((label, idx) => speakersMap.set(String(label), `S${idx + 1}`))
 
   await prisma.$transaction([
     prisma.segment.deleteMany({ where: { transcriptId: transcript.id } }),
