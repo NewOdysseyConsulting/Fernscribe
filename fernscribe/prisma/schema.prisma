@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  clerkId       String    @unique
+  email         String    @unique
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  organizations OrgMember[]
+  files         File[]
+  plan          Plan      @default(FREE)
+  minutesUsed   Int       @default(0)
+}
+
+model Organization {
+  id         String      @id @default(cuid())
+  name       String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  members    OrgMember[]
+  projects   Project[]
+  glossaries Glossary[]
+}
+
+model OrgMember {
+  id        String        @id @default(cuid())
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String
+  org       Organization  @relation(fields: [orgId], references: [id])
+  orgId     String
+  role      OrgRole       @default(MEMBER)
+  createdAt DateTime      @default(now())
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum Plan {
+  FREE
+  PRO
+  TEAM
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  org           Organization  @relation(fields: [orgId], references: [id])
+  orgId         String
+  name          String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  files         File[]
+}
+
+model File {
+  id           String      @id @default(cuid())
+  owner        User?       @relation(fields: [ownerId], references: [id])
+  ownerId      String?
+  project      Project?    @relation(fields: [projectId], references: [id])
+  projectId    String?
+  filename     String
+  sourceUrl    String
+  durationSec  Int?
+  sizeBytes    Int?
+  createdAt    DateTime    @default(now())
+  jobs         Job[]
+  transcript   Transcript?
+}
+
+model Job {
+  id            String     @id @default(cuid())
+  file          File       @relation(fields: [fileId], references: [id])
+  fileId        String
+  status        JobStatus  @default(PENDING)
+  providerId    String?
+  error         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Transcript {
+  id          String      @id @default(cuid())
+  file        File        @relation(fields: [fileId], references: [id])
+  fileId      String      @unique
+  language    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  segments    Segment[]
+  speakers    Speaker[]
+  cleanRead   CleanRead?
+  publicToken String      @unique @default(cuid())
+}
+
+model Segment {
+  id            String     @id @default(cuid())
+  transcript    Transcript @relation(fields: [transcriptId], references: [id])
+  transcriptId  String
+  startMs       Int
+  endMs         Int
+  text          String
+  speakerId     String?
+}
+
+model Speaker {
+  id           String      @id @default(cuid())
+  transcript   Transcript  @relation(fields: [transcriptId], references: [id])
+  transcriptId String
+  name         String
+  label        String
+}
+
+model CleanRead {
+  id            String     @id @default(cuid())
+  transcript    Transcript @relation(fields: [transcriptId], references: [id])
+  transcriptId  String     @unique
+  text          String
+  createdAt     DateTime   @default(now())
+}
+
+model Glossary {
+  id        String        @id @default(cuid())
+  org       Organization  @relation(fields: [orgId], references: [id])
+  orgId     String
+  name      String
+  terms     String[]
+  createdAt DateTime      @default(now())
+}
